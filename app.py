@@ -1,40 +1,37 @@
 from flask import Flask, jsonify, request
-import sys
 import mariadb
-
-try:
-    conn = mariadb.connect(
-        user="agathaessence",
-        password="agathaessence111",
-        host="10.9.120.5",
-        port=8080,
-        database="agathaessence"
-    )
-except mariadb.Error as e:
-    print(f"Error connecting to MariaDB Platform: {e}")
-    sys.exit(1)
 
 
 app = Flask(__name__)
 
-
 @app.route('/profiles')
 def profiles():
-    db = mariadb.connect(db_file, detect_types=mariadb.PARSE_DECLTYPES)
-    db.row_factory =dict_factory
-    #CONSULTA
-    query= "SELECT * FROM proffiles"
-    result= db.execute(query)
-    #CONVERTIR OBJETO CURSOR A LISTA
-    result= list(result)
-    #CERRAR LA CONEXIÓN
-    db.close()
+    db = mariadb.connect(
+        user="agathaessence",
+        password="agathaessence111",
+        host="10.9.120.5",
+        database="agathaessence"
+    )
+    cur = db.cursor()
+    cur.execute("SELECT * FROM Proffiles")
 
-    return jsonify(result)
+    profiles = [column[0] for column in cur.description]
+    tabla = []
+    for row in cur:
+        tabla.append(dict(zip(profiles, row)))
+    
+    return jsonify(tabla)
 
 @app.route("/profiles/<int:id>")
 def detalle_profiles(id):
-    db = profiles.connect(db_file,detect_types=profiles.PARSE_DECLTYPES)
-    db.row_factory = dict_factory
-    #CONSULTA 1
-    qnombre= "SELECT first_name, last_name FROM proffiles WHERE id_profile = ?"
+    db = mariadb.connect(
+        user="agathaessence",
+        password="agathaessence111",
+        host="10.9.120.5",
+        database="agathaessence"
+    )
+    cur = db.cursor()
+    cur.execute("SELECT first_name, last_name FROM Proffiles WHERE id_profile = ?", (id,))
+    profiles = [column[0] for column in cur.description]
+    tabla = [dict(zip(profiles, row))for row in cur.fetchall()]
+    return jsonify(tabla)
